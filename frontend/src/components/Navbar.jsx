@@ -9,50 +9,63 @@ export default function Navbar() {
   const { itemCount }       = useCart()
   const navigate            = useNavigate()
   const location            = useLocation()
-  const [menuOpen, setMenuOpen] = useState(false)
+  
+  // Extract search from URL if present
+  const searchParams = new URLSearchParams(location.search)
+  const initialSearch = searchParams.get('q') || ''
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
 
   const handleLogout = () => {
     logout()
     navigate('/')
   }
 
-  const isActive = (path) =>
-    location.pathname === path ? 'nav-link active' : 'nav-link'
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      navigate(`/?q=${encodeURIComponent(searchTerm.trim())}`)
+    } else {
+      navigate('/')
+    }
+  }
 
   return (
     <nav className="navbar">
-      <div className="container navbar-inner">
-        {/* Logo */}
+      <div className="navbar-inner">
+        {/* Left: Text Logo */}
         <Link to="/" className="navbar-logo">
-          <span className="logo-icon">⚡</span>
-          <span className="logo-text">EBS</span>
-          <span className="logo-tag">Store</span>
+          <span className="logo-icon">e</span>
+          <span className="logo-text">Commerce</span>
+          <span className="logo-tag">.in</span>
         </Link>
-
-        {/* Desktop Nav Links */}
-        <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          <Link to="/"         className={isActive('/')}>Catalog</Link>
-          {user && (
-            <Link to="/dashboard" className={isActive('/dashboard')}>My Orders</Link>
-          )}
-        </div>
+        
+        {/* Center: Search Bar */}
+        <form className="navbar-search" onSubmit={handleSearch}>
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button type="submit">🔍</button>
+        </form>
 
         {/* Right Actions */}
         <div className="navbar-actions">
-          {/* Cart Button */}
+          {user && (
+            <Link to="/dashboard" className="nav-link">Orders</Link>
+          )}
+
           <Link to="/cart" className="nav-cart-btn" id="cart-nav-btn">
+            <span className="cart-badge">{itemCount || 0}</span>
             <span className="cart-icon">🛒</span>
-            {itemCount > 0 && (
-              <span className="cart-badge">{itemCount}</span>
-            )}
+            <span>Cart</span>
           </Link>
 
-          {/* Auth */}
           {user ? (
             <div className="nav-user">
               <span className="nav-user-name">
-                <span className="user-avatar">{user.name?.[0]?.toUpperCase()}</span>
-                {user.name?.split(' ')[0]}
+                Hello, {user.name?.split(' ')[0]}
               </span>
               <button
                 id="logout-btn"
@@ -64,19 +77,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="nav-auth">
-              <Link to="/login"    className="btn btn-secondary btn-sm" id="login-nav-btn">Login</Link>
-              <Link to="/register" className="btn btn-primary btn-sm"   id="register-nav-btn">Register</Link>
+              <Link to="/login" id="login-nav-btn">Sign in</Link>
+              <Link to="/register" id="register-nav-btn">Register</Link>
             </div>
           )}
-
-          {/* Mobile hamburger */}
-          <button
-            className="hamburger"
-            onClick={() => setMenuOpen(p => !p)}
-            aria-label="Toggle menu"
-          >
-            <span /><span /><span />
-          </button>
         </div>
       </div>
     </nav>
