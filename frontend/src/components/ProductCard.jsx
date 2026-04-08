@@ -6,9 +6,6 @@ export default function ProductCard({ product }) {
   const { addItem } = useCart()
   const price    = product.salePrice || product.originalPrice
   const hasDiscount = product.salePrice && product.salePrice < product.originalPrice
-  const discount = hasDiscount
-    ? Math.round((1 - product.salePrice / product.originalPrice) * 100)
-    : null
 
   const renderStars = (rating) => {
     const stars = Math.round(rating || 0)
@@ -16,61 +13,46 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div className="product-card glass-card fade-in-up" id={`product-card-${product.id}`}>
-      {/* Discount badge */}
-      {discount && (
-        <span className="product-discount-badge">-{discount}%</span>
-      )}
-
+    <div className="product-card" id={`product-card-${product.id}`}>
       {/* Product Image */}
       <Link to={`/products/${product.slug}`} className="product-image-wrap">
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.productName} className="product-image" />
         ) : (
-          <div className="product-image-placeholder">
-            <span>🛍️</span>
-          </div>
+          <div className="product-image-placeholder">No Image</div>
         )}
-        <div className="product-image-overlay">
-          <span>View Details →</span>
-        </div>
       </Link>
 
       {/* Content */}
       <div className="product-card-body">
-        <p className="product-category-label">
-          {product.productType || 'General'}
-        </p>
         <Link to={`/products/${product.slug}`} className="product-name">
           {product.productName}
         </Link>
-
+        
         {/* Rating */}
         {product.ratings > 0 && (
-          <div className="rating">
+          <div className="product-rating">
             <span>{renderStars(product.ratings)}</span>
-            <span className="rating-value">{product.ratings?.toFixed(1)}</span>
+            <span className="rating-count">{Math.floor(Math.random() * 500) + 10}</span>
           </div>
         )}
 
         {/* Price */}
         <div className="product-price-row">
-          {hasDiscount ? (
-            <>
-              <span className="price-sale">₹{product.salePrice?.toFixed(2)}</span>
-              <span className="price-original">₹{product.originalPrice?.toFixed(2)}</span>
-            </>
-          ) : (
-            <span className="price-current">₹{price?.toFixed(2)}</span>
+          <span className="price-symbol">₹</span>
+          <span className="price-whole">{Math.floor(price)}</span>
+          <span className="price-fraction">{(price % 1).toFixed(2).substring(2)}</span>
+          {hasDiscount && (
+            <span className="price-original">M.R.P: ₹{product.originalPrice?.toFixed(2)}</span>
           )}
         </div>
 
-        {/* Stock indicator */}
-        <div className="product-stock">
+        {/* Delivery / Stock */}
+        <div className="product-delivery">
           {product.quantity > 0 ? (
-            <span className="badge badge-success">In Stock ({product.quantity})</span>
+            <span className="in-stock">In stock</span>
           ) : (
-            <span className="badge badge-danger">Out of Stock</span>
+            <span className="out-of-stock">Currently unavailable.</span>
           )}
         </div>
 
@@ -81,16 +63,10 @@ export default function ProductCard({ product }) {
             className="btn btn-primary"
             onClick={() => addItem(product.id, 1)}
             disabled={product.quantity === 0}
+            style={{ width: '100%', borderRadius: '20px' }}
           >
-            🛒 Add to Cart
+            Add to cart
           </button>
-          <Link
-            to={`/products/${product.slug}`}
-            className="btn btn-secondary"
-            id={`view-product-${product.id}`}
-          >
-            Details
-          </Link>
         </div>
       </div>
     </div>

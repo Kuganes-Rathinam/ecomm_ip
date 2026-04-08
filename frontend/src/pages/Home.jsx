@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { productApi, categoryApi } from '../api'
 import ProductCard from '../components/ProductCard'
+import { useLocation } from 'react-router-dom'
 import './Home.css'
 
 export default function Home() {
   const [products,   setProducts]   = useState([])
   const [categories, setCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
-  const [search,     setSearch]     = useState('')
   const [loading,    setLoading]    = useState(true)
+
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const searchQuery = searchParams.get('q') || ''
 
   useEffect(() => {
     Promise.all([
@@ -23,7 +27,7 @@ export default function Home() {
   // Filter products client-side
   const filtered = products.filter(p => {
     const matchCat    = activeCategory === 'all' || p.categoryId === activeCategory
-    const matchSearch = p.productName.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = p.productName.toLowerCase().includes(searchQuery.toLowerCase())
     return matchCat && matchSearch
   })
 
@@ -31,88 +35,58 @@ export default function Home() {
     <div className="page-wrapper home-page">
       <div className="container">
 
-        {/* Hero Banner */}
-        <section className="hero-banner fade-in-up">
-          <div className="hero-content">
-            <span className="hero-tag">🔥 New Arrivals</span>
-            <h1 className="hero-title">
-              Shop the Future,<br />
-              <span className="gradient-text">Today.</span>
-            </h1>
-            <p className="hero-subtitle">
-              Discover curated collections across all categories — premium quality at unbeatable prices.
-            </p>
-          </div>
-          <div className="hero-glow" />
-        </section>
+        {/* Category Filter */}
+        <div className="category-sidebar">
+          <h3>Departments</h3>
+          <ul className="category-list">
+            <li>
+              <button
+                id="filter-all"
+                className={activeCategory === 'all' ? 'active' : ''}
+                onClick={() => setActiveCategory('all')}
+              >
+                All Products
+              </button>
+            </li>
+            {categories.map(cat => (
+              <li key={cat.id}>
+                <button
+                  id={`filter-cat-${cat.id}`}
+                  className={activeCategory === cat.id ? 'active' : ''}
+                  onClick={() => setActiveCategory(cat.id)}
+                >
+                  {cat.categoryName}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* Search Bar */}
-        <div className="search-bar-wrap fade-in-up">
-          <span className="search-icon">🔍</span>
-          <input
-            id="product-search"
-            type="text"
-            className="search-input"
-            placeholder="Search products..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {search && (
-            <button className="search-clear" onClick={() => setSearch('')}>✕</button>
+        <div className="main-content">
+          {/* Results Summary */}
+          <div className="results-summary">
+            <span>
+              {loading ? 'Loading...' : `1-${filtered.length} of over ${filtered.length} results`}
+              {searchQuery && <span> for <strong>"{searchQuery}"</strong></span>}
+            </span>
+          </div>
+
+          {/* Product Grid */}
+          {loading ? (
+            <div className="spinner-wrapper"><div className="spinner" /></div>
+          ) : filtered.length > 0 ? (
+            <div className="product-grid">
+              {filtered.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <h3>No results found</h3>
+              <p>Try checking your spelling or use more general terms</p>
+            </div>
           )}
         </div>
-
-        {/* Category Filter */}
-        <div className="category-filters fade-in-up">
-          <button
-            id="filter-all"
-            className={`category-chip ${activeCategory === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveCategory('all')}
-          >
-            All Products
-          </button>
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              id={`filter-cat-${cat.id}`}
-              className={`category-chip ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              {cat.categoryName}
-            </button>
-          ))}
-        </div>
-
-        {/* Results Summary */}
-        <div className="results-summary">
-          <span className="section-subtitle">
-            {loading ? 'Loading...' : `${filtered.length} product${filtered.length !== 1 ? 's' : ''} found`}
-          </span>
-        </div>
-
-        {/* Product Grid */}
-        {loading ? (
-          <div className="spinner-wrapper"><div className="spinner" /></div>
-        ) : filtered.length > 0 ? (
-          <div className="product-grid">
-            {filtered.map((product, i) => (
-              <div key={product.id} style={{ animationDelay: `${i * 50}ms` }}>
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <div className="empty-state-icon">🛍️</div>
-            <h3 className="empty-state-title">No products found</h3>
-            <p className="empty-state-desc">
-              Try a different search term or category filter
-            </p>
-            <button className="btn btn-primary" onClick={() => { setSearch(''); setActiveCategory('all') }}>
-              Clear Filters
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )

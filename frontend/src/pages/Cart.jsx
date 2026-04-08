@@ -10,9 +10,8 @@ export default function Cart() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [productDetails, setProductDetails] = useState({}) // productId → Product
+  const [productDetails, setProductDetails] = useState({}) 
 
-  // Fetch product details for display (names, images)
   useEffect(() => {
     if (!cart?.items?.length) return
     Promise.all(cart.items.map(item => productApi.getById(item.productId)))
@@ -26,10 +25,9 @@ export default function Cart() {
   if (!user) return (
     <div className="page-wrapper">
       <div className="container empty-state">
-        <div className="empty-state-icon">🔐</div>
-        <h3 className="empty-state-title">Please Login</h3>
+        <h3 className="empty-state-title">Please Sign in</h3>
         <p className="empty-state-desc">You need to be logged in to view your cart</p>
-        <Link to="/login" className="btn btn-primary">Login</Link>
+        <Link to="/login" className="btn btn-primary" style={{ padding: '8px 20px' }}>Sign in to your account</Link>
       </div>
     </div>
   )
@@ -44,34 +42,33 @@ export default function Cart() {
   }, 0)
 
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper cart-page">
       <div className="container">
-        <h1 className="section-title">Your Cart</h1>
-        <p className="section-subtitle">
-          {items.length} item{items.length !== 1 ? 's' : ''} in your cart
-        </p>
-
         {items.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">🛒</div>
-            <h3 className="empty-state-title">Your cart is empty</h3>
-            <p className="empty-state-desc">Add some products to get started</p>
-            <Link to="/" className="btn btn-primary">Continue Shopping</Link>
+          <div className="cart-empty-container">
+            <div className="cart-empty-content">
+              <h2>Your Amazon Cart is empty.</h2>
+              <p>Check your Saved for later items below or <Link to="/">continue shopping</Link>.</p>
+            </div>
           </div>
         ) : (
           <div className="cart-layout">
             {/* Items List */}
-            <div className="cart-items-list">
+            <div className="cart-items-section">
+              <h2>Shopping Cart</h2>
+              <div className="cart-price-header">Price</div>
+              <div className="divider" />
+              
               {items.map(item => {
                 const p = productDetails[item.productId]
                 const price = p?.salePrice || p?.originalPrice || 0
                 return (
-                  <div key={item.productId} className="cart-item glass-card" id={`cart-item-${item.productId}`}>
+                  <div key={item.productId} className="cart-item" id={`cart-item-${item.productId}`}>
                     {/* Image */}
                     <div className="cart-item-image">
                       {p?.imageUrl
                         ? <img src={p.imageUrl} alt={p?.productName} />
-                        : <div className="cart-item-placeholder">🛍️</div>
+                        : <div className="cart-item-placeholder">No Image</div>
                       }
                     </div>
 
@@ -80,69 +77,56 @@ export default function Cart() {
                       <Link to={`/products/${p?.slug}`} className="cart-item-name">
                         {p?.productName || 'Loading...'}
                       </Link>
-                      <p className="cart-item-price">₹{price.toFixed(2)} each</p>
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="qty-stepper">
-                      <button
-                        id={`qty-dec-${item.productId}`}
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                      >−</button>
-                      <span>{item.quantity}</span>
-                      <button
-                        id={`qty-inc-${item.productId}`}
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                      >+</button>
+                      <div className="cart-item-stock">In stock</div>
+                      <div className="cart-item-actions">
+                         <select 
+                           value={item.quantity} 
+                           onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value))}
+                           className="qty-dropdown"
+                         >
+                           {[...Array(10)].map((_, i) => (
+                             <option key={i+1} value={i+1}>Qty: {i+1}</option>
+                           ))}
+                         </select>
+                         <span className="action-separator">|</span>
+                         <button
+                           id={`remove-${item.productId}`}
+                           className="cart-action-link"
+                           onClick={() => removeItem(item.productId)}
+                         >Delete</button>
+                      </div>
                     </div>
 
                     {/* Line Total */}
-                    <div className="cart-item-total">
-                      ₹{(price * item.quantity).toFixed(2)}
+                    <div className="cart-item-price">
+                       ₹{(price * item.quantity).toFixed(2)}
                     </div>
-
-                    {/* Remove */}
-                    <button
-                      id={`remove-${item.productId}`}
-                      className="cart-remove-btn"
-                      onClick={() => removeItem(item.productId)}
-                      title="Remove item"
-                    >✕</button>
                   </div>
                 )
               })}
+              <div className="divider" />
+              <div className="cart-subtotal-row">
+                Subtotal ({items.length} items): <span className="cart-subtotal-price">₹{subtotal.toFixed(2)}</span>
+              </div>
             </div>
 
             {/* Order Summary */}
-            <div className="cart-summary glass-card">
-              <h3 className="cart-summary-title">Order Summary</h3>
-              <div className="divider" />
-
-              <div className="summary-row">
-                <span>Subtotal ({items.length} items)</span>
-                <span>₹{subtotal.toFixed(2)}</span>
+            <div className="cart-summary-section">
+              <div className="summary-protection">
+                <span className="protection-icon">✓</span>
+                Your order is eligible for FREE Delivery.
               </div>
-              <div className="summary-row">
-                <span>Shipping</span>
-                <span className="summary-free">FREE</span>
+              <div className="cart-subtotal-main">
+                Subtotal ({items.length} items): <span className="cart-subtotal-price">₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="divider" />
-              <div className="summary-row summary-total">
-                <span>Total</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-
+              
               <button
                 id="proceed-checkout-btn"
-                className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginTop: 'var(--space-6)' }}
+                className="btn btn-primary btn-lg checkout-btn"
                 onClick={() => navigate('/checkout')}
               >
-                Proceed to Checkout →
+                Proceed to Buy
               </button>
-              <Link to="/" className="btn btn-secondary" style={{ width: '100%', marginTop: 'var(--space-3)' }}>
-                Continue Shopping
-              </Link>
             </div>
           </div>
         )}
