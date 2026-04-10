@@ -1,0 +1,84 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      # Global CORS configuration — mirrors the monolith's CorsConfig.java
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      # Route definitions — each path prefix is forwarded to the appropriate microservice
+      routes:
+        # /api/users/** → user-service (port 8081)
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+
+        # /api/products/**, /api/categories/**, /api/attributes/**, /api/terms/** → catalog-service (port 8082)
+        - id: catalog-service-products
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/api/products/**
+
+        - id: catalog-service-categories
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/api/categories/**
+
+        - id: catalog-service-attributes
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/api/attributes/**
+
+        - id: catalog-service-terms
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/api/terms/**
+
+        # /api/carts/** → cart-service (port 8083)
+        - id: cart-service
+          uri: lb://CART-SERVICE
+          predicates:
+            - Path=/api/carts/**
+
+        # /api/orders/**, /api/payments/** → order-payment-service (port 8084)
+        - id: order-payment-orders
+          uri: lb://ORDER-PAYMENT-SERVICE
+          predicates:
+            - Path=/api/orders/**
+
+        - id: order-payment-payments
+          uri: lb://ORDER-PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/**
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.ebs.gateway: INFO
