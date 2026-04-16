@@ -1,9 +1,0 @@
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\controller\CartController.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\service\CartService.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\CartServiceApplication.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\client\CatalogServiceClient.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\exception\GlobalExceptionHandler.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\model\CartItem.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\model\Cart.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\client\ProductDto.java
-c:\dbms_project\microservices\cart-service\src\main\java\com\ebs\cart\repository\CartRepository.java

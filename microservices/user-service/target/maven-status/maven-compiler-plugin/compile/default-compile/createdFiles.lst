@@ -1,7 +1,0 @@
-com\ebs\user\repository\UserRepository.class
-com\ebs\user\service\UserService.class
-com\ebs\user\model\User.class
-com\ebs\user\controller\UserController.class
-com\ebs\user\model\User$UserBuilder.class
-com\ebs\user\exception\GlobalExceptionHandler.class
-com\ebs\user\UserServiceApplication.class

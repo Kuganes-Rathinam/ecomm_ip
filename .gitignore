@@ -1,2 +1,12 @@
+# Maven build outputs
 backend/target/
+microservices/*/target/
+
+# Frontend
 frontend/node_modules/
+frontend/dist/
+
+# Environment files with secrets
+frontend/.env.local
+frontend/.env.*.local
+.env.local
